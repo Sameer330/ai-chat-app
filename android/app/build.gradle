@@ -47,7 +47,7 @@ android {
         applicationId "com.example.ai_chat_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 21
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -66,6 +66,14 @@ flutter {
     source '../..'
 }
 
+//plugins {
+//    id 'com.android.application'
+//    // Add the Google services Gradle plugin
+//    id 'com.google.gms.google-services'
+//}
+
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation platform('com.google.firebase:firebase-bom:32.0.0')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
 }
