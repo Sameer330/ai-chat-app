@@ -13,9 +13,12 @@ class _DirectorState extends State<Director> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Chat Bot"),
+        backgroundColor: Colors.green.shade200,
       ),
-      body: const Center(
-        child: Text("Chat Bot"),
+      body: Column(
+        children: const [
+          Text("Chat Bot"),
+        ],
       ),
     );
   }
