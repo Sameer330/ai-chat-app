@@ -17,5 +17,12 @@ samples, guidance on mobile development, and a full API reference.
 
 ## Login Screen
 
-![image](https://github.com/Sameer330/ai-chat-app/assets/83571153/f5756574-5a2d-4823-8653-3731a6393558)
+<!-- ![image]() -->
+<img src="https://github.com/Sameer330/ai-chat-app/assets/83571153/f5756574-5a2d-4823-8653-3731a6393558" width="200"/>
+
+## Sign up Screen
+
+<!-- ![image]() -->
+
+<img src="https://github.com/Sameer330/ai-chat-app/assets/83571153/55827be3-0344-415d-ad79-39d889efa729" width="200"/>
 
