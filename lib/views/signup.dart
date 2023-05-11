@@ -1,12 +1,18 @@
 import 'dart:ui';
 
 import 'package:ai_chat_app/utils/colors.dart';
+import 'package:ai_chat_app/utils/common_vars.dart';
+import 'package:email_validator/email_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shimmer/shimmer.dart';
 
 class SignUpPage extends StatefulWidget {
-  const SignUpPage({Key? key}) : super(key: key);
+  final VoidCallback onClickedSignIn;
+
+  const SignUpPage({Key? key, required this.onClickedSignIn}) : super(key: key);
 
   @override
   State<SignUpPage> createState() => _SignUpPageState();
@@ -15,13 +21,14 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final GlobalKey<FormState> _loginFormKey = GlobalKey();
+  final GlobalKey<FormState> _signUpFormKey = GlobalKey();
+  bool _showPassword = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -61,7 +68,7 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
 
             const Text(
-              "Sign in.",
+              "Sign up.",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 50,
@@ -74,12 +81,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
             TextButton.icon(
               style: TextButton.styleFrom(
-                fixedSize: Size(MediaQuery
-                    .of(context)
-                    .size
-                    .width * 0.93, 70),
-                padding:
-                const EdgeInsets.symmetric(vertical: 20, horizontal: 100),
+                fixedSize: Size(MediaQuery.of(context).size.width * 0.93, 70),
+                padding: const EdgeInsets.symmetric(vertical: 20),
                 shape: RoundedRectangleBorder(
                   side: const BorderSide(
                     color: Palette.borderColor,
@@ -101,7 +104,7 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               label: const Text(
                 "Sign up with Google",
-                softWrap: true,
+                // softWrap: true,
                 style: TextStyle(
                   color: Palette.whiteColor,
                   fontSize: 17,
@@ -123,26 +126,28 @@ class _SignUpPageState extends State<SignUpPage> {
             /// Add Login Form
             Center(
               child: Form(
-                key: _loginFormKey,
+                key: _signUpFormKey,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 0.93,
+                      width: MediaQuery.of(context).size.width * 0.93,
                       child: TextFormField(
                         controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
                         validator: (value) {
                           if (value!.isEmpty) {
                             return "Email cannot be empty!";
+                          } else if (!EmailValidator.validate(
+                              _emailController.text.trim())) {
+                            return "Email does not exist!";
                           }
                           return null;
                         },
                         textInputAction: TextInputAction.next,
                         decoration: InputDecoration(
+                          errorMaxLines: 5,
                           hintText: "Email",
                           contentPadding: const EdgeInsets.all(27),
                           disabledBorder: InputBorder.none,
@@ -182,19 +187,38 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 15),
                     SizedBox(
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 0.93,
+                      width: MediaQuery.of(context).size.width * 0.93,
                       child: TextFormField(
                         controller: _passwordController,
+                        keyboardType: TextInputType.visiblePassword,
                         validator: (value) {
+                          final passwordRegex = RegExp(
+                              r'^(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[!@#\$%&])[a-zA-Z0-9!@#\$%&]{6,}$');
+
                           if (value!.isEmpty) {
                             return "Password cannot be empty!";
+                          } else if (_passwordController.text.length < 6) {
+                            return "Password must be at least 6 characters";
+                          } else if (!passwordRegex
+                              .hasMatch(_passwordController.text.trim())) {
+                            return "Required -  an uppercase letter, a special character (!@#\$%&), and a digit.";
                           }
                           return null;
                         },
+                        textInputAction: TextInputAction.go,
+                        obscureText: !_showPassword,
                         decoration: InputDecoration(
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _showPassword = !_showPassword;
+                              });
+                            },
+                            icon: _showPassword
+                                ? const Icon(Icons.lock_open)
+                                : const Icon(Icons.lock),
+                          ),
+                          errorMaxLines: 5,
                           hintText: "Password",
                           contentPadding: const EdgeInsets.all(27),
                           disabledBorder: InputBorder.none,
@@ -249,17 +273,70 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                           borderRadius: BorderRadius.circular(7)),
                       child: ElevatedButton(
-                        onPressed: () {
-                          if (_loginFormKey.currentState!.validate()) {
-                            Fluttertoast.showToast(msg: "Login");
+                        onPressed: () async {
+                          if (_signUpFormKey.currentState!.validate()) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => Scaffold(
+                                body: Center(
+                                  child: Container(
+                                    // height: 200,
+                                    width: 200,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Shimmer.fromColors(
+                                      baseColor: const Color(0xFF8C52FF),
+                                      highlightColor: const Color(0xFFFF914D),
+                                      direction: ShimmerDirection.ltr,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          const Text(
+                                            "Signing you up...",
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            height: 20,
+                                          ),
+                                          Container(
+                                            height: 200,
+                                            width: 200,
+                                            color: Colors.white,
+                                            child: Image.asset(
+                                                'assets/app-icon/app-icon.png'),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              barrierDismissible: false,
+                            );
+
+                            try {
+                              await FirebaseAuth.instance
+                                  .createUserWithEmailAndPassword(
+                                email: _emailController.text.trim(),
+                                password: _passwordController.text.trim(),
+                              );
+                            } catch (e) {
+                              throw "Error $e";
+                            }
+                            navigatorKey.currentState!
+                                .popUntil((route) => route.isFirst);
                           }
                         },
                         style: ElevatedButton.styleFrom(
                           fixedSize: Size(
-                              MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width * 0.93, 55),
+                              MediaQuery.of(context).size.width * 0.93, 55),
                           backgroundColor: Colors.transparent,
                         ),
                         child: const Text(
@@ -276,7 +353,35 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
             ),
             const SizedBox(
-              height: 10,
+              height: 20,
+            ),
+            Text.rich(
+              TextSpan(
+                children: [
+                  const TextSpan(text: "Already have an account? "),
+                  TextSpan(
+                    text: "Sign in.",
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = widget.onClickedSignIn,
+                    //     () {
+                    //   Navigator.pushReplacement(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //       builder: (context) => const LoginPage(),
+                    //     ),
+                    //   );
+                    // },
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Palette.gradient2,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 20,
             ),
           ],
         ),

@@ -1,13 +1,19 @@
 import 'dart:ui';
 
 import 'package:ai_chat_app/utils/colors.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shimmer/shimmer.dart';
+
+import '../utils/common_vars.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  final VoidCallback onClickedSignUp;
+
+  const LoginPage({Key? key, required this.onClickedSignUp}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -17,6 +23,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _loginFormKey = GlobalKey();
+  bool _showPassword = false;
 
   @override
   void dispose() {
@@ -29,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -83,8 +90,7 @@ class _LoginPageState extends State<LoginPage> {
             TextButton.icon(
               style: TextButton.styleFrom(
                 fixedSize: Size(MediaQuery.of(context).size.width * 0.93, 70),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 100),
+                padding: const EdgeInsets.symmetric(vertical: 20),
                 shape: RoundedRectangleBorder(
                     side: const BorderSide(
                       color: Palette.borderColor,
@@ -136,14 +142,19 @@ class _LoginPageState extends State<LoginPage> {
                       width: MediaQuery.of(context).size.width * 0.93,
                       child: TextFormField(
                         controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
                         validator: (value) {
                           if (value!.isEmpty) {
                             return "Email cannot be empty!";
+                          } else if (!EmailValidator.validate(
+                              _emailController.text.trim())) {
+                            return "Email does not exist!";
                           }
                           return null;
                         },
                         textInputAction: TextInputAction.next,
                         decoration: InputDecoration(
+                          errorMaxLines: 5,
                           hintText: "Email",
                           contentPadding: const EdgeInsets.all(27),
                           disabledBorder: InputBorder.none,
@@ -192,8 +203,21 @@ class _LoginPageState extends State<LoginPage> {
                           }
                           return null;
                         },
+                        obscureText: !_showPassword,
                         decoration: InputDecoration(
+                          errorMaxLines: 5,
                           hintText: "Password",
+                          suffixIcon: IconButton(
+                            splashColor: Colors.transparent,
+                            onPressed: () {
+                              setState(() {
+                                _showPassword = !_showPassword;
+                              });
+                            },
+                            icon: _showPassword
+                                ? const Icon(Icons.lock_open)
+                                : const Icon(Icons.lock),
+                          ),
                           contentPadding: const EdgeInsets.all(27),
                           disabledBorder: InputBorder.none,
                           border: OutlineInputBorder(
@@ -250,12 +274,64 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: () async {
                           if (_loginFormKey.currentState!.validate()) {
                             // Fluttertoast.showToast(msg: "Login");
-
-                            await FirebaseAuth.instance
-                                .signInWithEmailAndPassword(
-                              email: _emailController.text.trim(),
-                              password: _passwordController.text.trim(),
+                            showDialog(
+                              context: context,
+                              builder: (context) => Scaffold(
+                                body: Center(
+                                  child: Container(
+                                    // height: 200,
+                                    width: 200,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Shimmer.fromColors(
+                                      baseColor: const Color(0xFF8C52FF),
+                                      highlightColor: const Color(0xFFFF914D),
+                                      direction: ShimmerDirection.ltr,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          const Text(
+                                            "Logging in...",
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            height: 20,
+                                          ),
+                                          Container(
+                                            height: 200,
+                                            width: 200,
+                                            color: Colors.white,
+                                            child: Image.asset(
+                                                'assets/app-icon/app-icon.png'),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              barrierDismissible: false,
                             );
+
+                            try {
+                              await FirebaseAuth.instance
+                                  .signInWithEmailAndPassword(
+                                email: _emailController.text.trim(),
+                                password: _passwordController.text.trim(),
+                              );
+                            } on FirebaseAuthException catch (e) {
+                              throw "Sign in error: $e";
+                            }
+
+                            navigatorKey.currentState!
+                                .popUntil((route) => route.isFirst);
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -278,23 +354,38 @@ class _LoginPageState extends State<LoginPage> {
             ),
 
             const SizedBox(
-              height: 10,
+              height: 20,
             ),
 
             /// Add Other Details
-            const Text.rich(
+            Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(text: "No Account? "),
+                  const TextSpan(text: "No Account? "),
                   TextSpan(
                     text: "Sign Up.",
-                    style: TextStyle(
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = widget.onClickedSignUp,
+
+                    //     () {
+                    //   Navigator.pushReplacement(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //       builder: (context) => const SignUpPage(),
+                    //     ),
+                    //   );
+                    // },
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Palette.gradient2,
+                      decoration: TextDecoration.underline,
                     ),
                   ),
                 ],
               ),
+            ),
+            const SizedBox(
+              height: 20,
             ),
           ],
         ),
