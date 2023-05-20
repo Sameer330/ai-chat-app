@@ -26,3 +26,14 @@ samples, guidance on mobile development, and a full API reference.
 
 <img src="https://github.com/Sameer330/ai-chat-app/assets/83571153/55827be3-0344-415d-ad79-39d889efa729" width="200"/>
 
+## Reset Password
+
+<img src="https://github.com/Sameer330/ai-chat-app/assets/83571153/8b1ff6ca-06b4-4349-bc68-3a3caa8ce991" width="200"/>
+
+## Chat Page
+
+<img src="https://github.com/Sameer330/ai-chat-app/assets/83571153/547a5ae3-89fe-44bc-9617-83d444804c09" width="200"/> <img src="https://github.com/Sameer330/ai-chat-app/assets/83571153/4bc485b5-0626-40dc-8e47-0c3717f5c51d" width="200"/> <img src="https://github.com/Sameer330/ai-chat-app/assets/83571153/2c21bfd0-c0ec-4da9-bb3b-836b79c4394b" width="200"/>
+
+## Profile Page
+
+<img src="" width="200"/>
