@@ -36,4 +36,12 @@ samples, guidance on mobile development, and a full API reference.
 
 ## Profile Page
 
-<img src="" width="200"/>
+<img src="https://github.com/Sameer330/ai-chat-app/assets/83571153/945dc5fd-f6b4-4f57-87e7-7137bae04c36" width="200"/>
+
+## Menu Page
+
+<img src="https://github.com/Sameer330/ai-chat-app/assets/83571153/d9f7b0af-ac4a-4a1f-8079-aaaaeba767ad" width="200"/>
+
+## Contribution Page
+
+<img src="https://github.com/Sameer330/ai-chat-app/assets/83571153/af60c040-6520-4bd6-9717-21b931772750" width="200"/>
