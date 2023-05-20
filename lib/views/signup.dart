@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:ai_chat_app/services/google_auth_service.dart';
 import 'package:ai_chat_app/utils/colors.dart';
 import 'package:ai_chat_app/utils/common_vars.dart';
 import 'package:email_validator/email_validator.dart';
@@ -7,6 +8,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -67,9 +71,9 @@ class _SignUpPageState extends State<SignUpPage> {
               height: 25,
             ),
 
-            const Text(
+            Text(
               "Sign up.",
-              style: TextStyle(
+              style: GoogleFonts.montserrat(
                 fontWeight: FontWeight.bold,
                 fontSize: 50,
               ),
@@ -93,6 +97,10 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               onPressed: () {
                 // TODO: Sign up with Google
+                final provider =
+                    Provider.of<AuthService>(context, listen: false);
+
+                provider.signInWithGoogle();
               },
               icon: SvgPicture.asset(
                 'assets/svgs/g_logo.svg',
@@ -102,10 +110,10 @@ class _SignUpPageState extends State<SignUpPage> {
                   currentColor: Palette.whiteColor,
                 ),
               ),
-              label: const Text(
+              label: Text(
                 "Sign up with Google",
                 // softWrap: true,
-                style: TextStyle(
+                style: GoogleFonts.montserrat(
                   color: Palette.whiteColor,
                   fontSize: 17,
                 ),
@@ -116,9 +124,9 @@ class _SignUpPageState extends State<SignUpPage> {
               height: 15,
             ),
 
-            const Text(
+            Text(
               "or",
-              style: TextStyle(fontSize: 17),
+              style: GoogleFonts.montserrat(fontSize: 17),
             ),
 
             const SizedBox(height: 15),
@@ -179,7 +187,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
-                          hintStyle: const TextStyle(
+                          hintStyle: GoogleFonts.montserrat(
                             color: Colors.white,
                           ),
                         ),
@@ -250,7 +258,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
-                          hintStyle: const TextStyle(
+                          hintStyle: GoogleFonts.montserrat(
                             color: Colors.white,
                           ),
                         ),
@@ -274,6 +282,8 @@ class _SignUpPageState extends State<SignUpPage> {
                           borderRadius: BorderRadius.circular(7)),
                       child: ElevatedButton(
                         onPressed: () async {
+                          FocusScope.of(context).unfocus();
+
                           if (_signUpFormKey.currentState!.validate()) {
                             showDialog(
                               context: context,
@@ -295,9 +305,9 @@ class _SignUpPageState extends State<SignUpPage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
                                         children: [
-                                          const Text(
+                                          Text(
                                             "Signing you up...",
-                                            style: TextStyle(
+                                            style: GoogleFonts.montserrat(
                                               fontSize: 20,
                                               fontWeight: FontWeight.w600,
                                             ),
@@ -327,7 +337,15 @@ class _SignUpPageState extends State<SignUpPage> {
                                 email: _emailController.text.trim(),
                                 password: _passwordController.text.trim(),
                               );
-                            } catch (e) {
+                            } on FirebaseAuthException catch (e) {
+                              Fluttertoast.showToast(
+                                msg: e.message!,
+                                backgroundColor: Colors.red,
+                              );
+
+                              navigatorKey.currentState!
+                                  .popUntil((route) => route.isFirst);
+
                               throw "Error $e";
                             }
                             navigatorKey.currentState!
@@ -339,9 +357,9 @@ class _SignUpPageState extends State<SignUpPage> {
                               MediaQuery.of(context).size.width * 0.93, 55),
                           backgroundColor: Colors.transparent,
                         ),
-                        child: const Text(
+                        child: Text(
                           "Sign up",
-                          style: TextStyle(
+                          style: GoogleFonts.montserrat(
                             fontWeight: FontWeight.w600,
                             fontSize: 17,
                           ),
@@ -371,7 +389,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     //     ),
                     //   );
                     // },
-                    style: const TextStyle(
+                    style: GoogleFonts.montserrat(
                       fontWeight: FontWeight.bold,
                       color: Palette.gradient2,
                       decoration: TextDecoration.underline,

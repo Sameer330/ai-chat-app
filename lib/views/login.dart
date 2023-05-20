@@ -1,11 +1,16 @@
 import 'dart:ui';
 
+import 'package:ai_chat_app/services/google_auth_service.dart';
 import 'package:ai_chat_app/utils/colors.dart';
+import 'package:ai_chat_app/views/reset_password.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../utils/common_vars.dart';
@@ -38,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(
@@ -75,9 +80,9 @@ class _LoginPageState extends State<LoginPage> {
               height: 25,
             ),
 
-            const Text(
+            Text(
               "Sign in.",
-              style: TextStyle(
+              style: GoogleFonts.montserrat(
                 fontWeight: FontWeight.bold,
                 fontSize: 50,
               ),
@@ -99,7 +104,10 @@ class _LoginPageState extends State<LoginPage> {
                     borderRadius: BorderRadius.circular(8.0)),
               ),
               onPressed: () {
-                // TODO: Login with Google
+                final provider =
+                    Provider.of<AuthService>(context, listen: false);
+
+                provider.signInWithGoogle();
               },
               icon: SvgPicture.asset(
                 'assets/svgs/g_logo.svg',
@@ -109,10 +117,10 @@ class _LoginPageState extends State<LoginPage> {
                   currentColor: Palette.whiteColor,
                 ),
               ),
-              label: const Text(
+              label: Text(
                 "Sign in with Google",
                 softWrap: true,
-                style: TextStyle(
+                style: GoogleFonts.montserrat(
                   color: Palette.whiteColor,
                   fontSize: 17,
                 ),
@@ -123,9 +131,9 @@ class _LoginPageState extends State<LoginPage> {
               height: 15,
             ),
 
-            const Text(
+            Text(
               "or",
-              style: TextStyle(fontSize: 17),
+              style: GoogleFonts.montserrat(fontSize: 17),
             ),
 
             const SizedBox(height: 15),
@@ -186,7 +194,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
-                          hintStyle: const TextStyle(
+                          hintStyle: GoogleFonts.montserrat(
                             color: Colors.white,
                           ),
                         ),
@@ -248,7 +256,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
-                          hintStyle: const TextStyle(
+                          hintStyle: GoogleFonts.montserrat(
                             color: Colors.white,
                           ),
                         ),
@@ -272,6 +280,8 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(7)),
                       child: ElevatedButton(
                         onPressed: () async {
+                          FocusScope.of(context).unfocus();
+
                           if (_loginFormKey.currentState!.validate()) {
                             // Fluttertoast.showToast(msg: "Login");
                             showDialog(
@@ -294,9 +304,9 @@ class _LoginPageState extends State<LoginPage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
                                         children: [
-                                          const Text(
+                                          Text(
                                             "Logging in...",
-                                            style: TextStyle(
+                                            style: GoogleFonts.montserrat(
                                               fontSize: 20,
                                               fontWeight: FontWeight.w600,
                                             ),
@@ -309,7 +319,7 @@ class _LoginPageState extends State<LoginPage> {
                                             width: 200,
                                             color: Colors.white,
                                             child: Image.asset(
-                                                'assets/app-icon/app-icon.png'),
+                                                'assets/app-icon/brain.png'),
                                           ),
                                         ],
                                       ),
@@ -327,6 +337,14 @@ class _LoginPageState extends State<LoginPage> {
                                 password: _passwordController.text.trim(),
                               );
                             } on FirebaseAuthException catch (e) {
+                              Fluttertoast.showToast(
+                                msg: e.message!,
+                                backgroundColor: Colors.red,
+                              );
+
+                              navigatorKey.currentState!
+                                  .popUntil((route) => route.isFirst);
+
                               throw "Sign in error: $e";
                             }
 
@@ -339,9 +357,9 @@ class _LoginPageState extends State<LoginPage> {
                               MediaQuery.of(context).size.width * 0.93, 55),
                           backgroundColor: Colors.transparent,
                         ),
-                        child: const Text(
+                        child: Text(
                           "Sign in",
-                          style: TextStyle(
+                          style: GoogleFonts.montserrat(
                             fontWeight: FontWeight.w600,
                             fontSize: 17,
                           ),
@@ -357,7 +375,7 @@ class _LoginPageState extends State<LoginPage> {
               height: 20,
             ),
 
-            /// Add Other Details
+            /// Already have account
             Text.rich(
               TextSpan(
                 children: [
@@ -375,7 +393,7 @@ class _LoginPageState extends State<LoginPage> {
                     //     ),
                     //   );
                     // },
-                    style: const TextStyle(
+                    style: GoogleFonts.montserrat(
                       fontWeight: FontWeight.bold,
                       color: Palette.gradient2,
                       decoration: TextDecoration.underline,
@@ -386,6 +404,41 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(
               height: 20,
+            ),
+
+            /// Forgot Password
+            Text.rich(
+              TextSpan(
+                children: [
+                  const TextSpan(text: "Forgot Password? "),
+                  TextSpan(
+                    text: "Change Password",
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ResetPasswordPage(),
+                          ),
+                        );
+                      },
+
+                    //     () {
+                    //   Navigator.pushReplacement(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //       builder: (context) => const SignUpPage(),
+                    //     ),
+                    //   );
+                    // },
+                    style: GoogleFonts.montserrat(
+                      fontWeight: FontWeight.bold,
+                      color: Palette.gradient2,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
