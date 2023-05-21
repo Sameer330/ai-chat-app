@@ -2,6 +2,12 @@
 
 A new Flutter project.
 
+# Demonstration Video
+
+* Please mind the "Video Quality". GitHub didn't allow me to upload a video file of more than 10MB.
+
+https://github.com/Sameer330/ai-chat-app/assets/83571153/e9539097-ec4e-4bcb-97f2-8fe1a1be372c
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
